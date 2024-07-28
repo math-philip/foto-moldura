@@ -1,84 +1,37 @@
-/* styles.css */
 body {
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background: #f0f0f0;
     text-align: center;
-}
-
-h1 {
-    margin-bottom: 20px;
-}
-
-#editorContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-}
-
-.frame-module__border {
-    border: 2px solid #000;
-    position: relative;
-    width: 500px;
-    height: 500px;
-    overflow: hidden;
-}
-
-.frame-module__content {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.canvas-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-#imageCanvas {
-    width: 100%;
-    height: 100%;
-    border: 2px solid #000;
-}
-
-.controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 10px;
-}
-
-#zoomSlider {
-    margin: 10px 0;
-    width: 150px;
+    padding: 20px;
 }
 
 button {
-    margin: 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
 }
 
-#finalImage {
-    max-width: 100%;
+button:hover {
+    background-color: #0056b3;
+}
+
+#imageContainer {
+    position: relative;
+    display: inline-block;
+}
+
+#uploadedImage {
+    width: 100%;
     height: auto;
 }
 
-#downloadLink {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    text-decoration: none;
-    color: white;
-    background-color: #007bff;
-    border-radius: 5px;
+#frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
 }
