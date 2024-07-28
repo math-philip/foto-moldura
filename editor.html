@@ -5,9 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor de Foto</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #uploadedImage {
+            position: absolute;
+            cursor: move;
+        }
+        #frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Não interage com o mouse */
+        }
+    </style>
 </head>
 <body>
     <h1>Edite sua Foto</h1>
+    <div id="container">
+        <img id="uploadedImage" src="" alt="Foto">
+        <img id="frame" src="images/moldura.png" alt="Moldura">
+    </div>
+    <button id="doneButton">Pronto</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.11/dist/interact.min.js"></script>
     <script src="editor-script.js"></script>
 </body>
 </html>
