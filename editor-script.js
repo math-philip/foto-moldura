@@ -33,14 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById('zoomIn').addEventListener('click', function() {
             const slider = document.getElementById('zoomSlider');
-            slider.value = parseFloat(slider.value) + 0.1;
+            slider.value = Math.min(parseFloat(slider.value) + 0.1, 3);
             scale = slider.value;
             img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         });
 
         document.getElementById('zoomOut').addEventListener('click', function() {
             const slider = document.getElementById('zoomSlider');
-            slider.value = parseFloat(slider.value) - 0.1;
+            slider.value = Math.max(parseFloat(slider.value) - 0.1, 0.5);
             scale = slider.value;
             img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         });
@@ -64,12 +64,22 @@ function saveImage() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Calcula o scale, eixos e dimensões da imagem
+    const scale = parseFloat(img.getAttribute('data-scale')) || 1;
+    const imgWidth = img.naturalWidth * scale;
+    const imgHeight = img.naturalHeight * scale;
+    const offsetX = parseFloat(img.getAttribute('data-x')) || 0;
+    const offsetY = parseFloat(img.getAttribute('data-y')) || 0;
+
+    // Desenha a imagem ajustada no canvas
     ctx.drawImage(img,
-        -parseFloat(img.getAttribute('data-x')) || 0,
-        -parseFloat(img.getAttribute('data-y')) || 0,
-        img.naturalWidth * (parseFloat(img.getAttribute('data-scale')) || 1),
-        img.naturalHeight * (parseFloat(img.getAttribute('data-scale')) || 1)
+        -offsetX,
+        -offsetY,
+        imgWidth,
+        imgHeight
     );
+    
+    // Desenha a moldura no canvas
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
 
     const finalImageSrc = canvas.toDataURL('image/png');
