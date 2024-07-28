@@ -1,4 +1,3 @@
-// editor-script.js
 document.addEventListener('DOMContentLoaded', function() {
     const uploadedImage = localStorage.getItem('uploadedImage');
     if (uploadedImage) {
@@ -27,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.save();
             ctx.translate(x, y);
             ctx.scale(scale, scale);
-            ctx.drawImage(img, 0, 0, img.width, img.height);
+            ctx.drawImage(img, 0, 0);
             ctx.restore();
         }
 
@@ -68,34 +67,33 @@ document.addEventListener('DOMContentLoaded', function() {
             saveImage();
         });
     } else {
-        window.location.href = 'upload.html';
+        window.location.href = 'index.html';
     }
 });
 
 function saveImage() {
     const imageCanvas = document.getElementById('imageCanvas');
-    const ctx = imageCanvas.getContext('2d');
-    const img = document.querySelector('#imageCanvas img');
-    const frame = new Image();
-    frame.src = 'https://frame.twibbonize.com/679bb025-afc8-4ccd-b69f-3e11f8e43099.png'; // URL da moldura
-    const scale = parseFloat(document.getElementById('zoomSlider').value) || 1;
-    const offsetX = parseFloat(document.getElementById('imageCanvas').getAttribute('data-x')) || 0;
-    const offsetY = parseFloat(document.getElementById('imageCanvas').getAttribute('data-y')) || 0;
-
     const finalCanvas = document.createElement('canvas');
-    const finalCtx = finalCanvas.getContext('2d');
     finalCanvas.width = imageCanvas.width;
     finalCanvas.height = imageCanvas.height;
+    const finalCtx = finalCanvas.getContext('2d');
 
-    finalCtx.translate(-offsetX + (finalCanvas.width / 2), -offsetY + (finalCanvas.height / 2));
-    finalCtx.scale(scale, scale);
-    finalCtx.drawImage(img, 0, 0);
+    const img = new Image();
+    img.src = localStorage.getItem('uploadedImage');
+    img.onload = function() {
+        finalCtx.save();
+        finalCtx.translate(-x + (finalCanvas.width / 2), -y + (finalCanvas.height / 2));
+        finalCtx.scale(scale, scale);
+        finalCtx.drawImage(img, 0, 0);
+        finalCtx.restore();
 
-    frame.onload = function() {
-        finalCtx.drawImage(frame, 0, 0, finalCanvas.width, finalCanvas.height);
-
-        const finalImageSrc = finalCanvas.toDataURL('image/png');
-        localStorage.setItem('finalImage', finalImageSrc);
-        window.location.href = 'final.html';
+        const frame = new Image();
+        frame.src = 'path/to/your/frame.png'; // Substitua pelo caminho da sua moldura
+        frame.onload = function() {
+            finalCtx.drawImage(frame, 0, 0, finalCanvas.width, finalCanvas.height);
+            const finalImageSrc = finalCanvas.toDataURL('image/png');
+            localStorage.setItem('finalImage', finalImageSrc);
+            window.location.href = 'final.html';
+        };
     };
 }
