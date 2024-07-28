@@ -90,6 +90,9 @@ function saveImage() {
     // Desenhar a moldura no canvas
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
 
+    // Teste para garantir que a imagem final foi criada
+    console.log('Imagem final criada');
+
     const finalImageSrc = canvas.toDataURL('image/png');
     localStorage.setItem('finalImage', finalImageSrc);
 
