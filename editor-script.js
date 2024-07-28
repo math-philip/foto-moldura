@@ -1,57 +1,70 @@
+// editor-script.js
 document.addEventListener('DOMContentLoaded', function() {
     const uploadedImage = localStorage.getItem('uploadedImage');
     if (uploadedImage) {
-        const img = document.getElementById('uploadedImage');
+        const img = new Image();
         img.src = uploadedImage;
-
-        let scale = 1;
+        const imageCanvas = document.getElementById('imageCanvas');
+        const ctx = imageCanvas.getContext('2d');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const zoomInButton = document.getElementById('zoomIn');
+        const zoomOutButton = document.getElementById('zoomOut');
+        const doneButton = document.getElementById('doneButton');
+        let scale = parseFloat(zoomSlider.value) || 1;
         let x = 0;
         let y = 0;
+        let isDragging = false;
 
-        interact('#uploadedImage')
-            .draggable({
-                listeners: {
-                    move(event) {
-                        x += event.dx;
-                        y += event.dy;
-                        img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-                        img.setAttribute('data-x', x);
-                        img.setAttribute('data-y', y);
-                        img.setAttribute('data-scale', scale);
-                    }
-                },
-                modifiers: [
-                    interact.modifiers.restrictRect({
-                        restriction: 'parent',
-                        endOnly: true
-                    })
-                ],
-                inertia: true
-            });
+        imageCanvas.width = 500;
+        imageCanvas.height = 500;
 
-        document.getElementById('zoomSlider').addEventListener('input', function(event) {
-            scale = event.target.value;
-            img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-            img.setAttribute('data-scale', scale);
+        img.onload = function() {
+            drawImage();
+        };
+
+        function drawImage() {
+            ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            ctx.restore();
+        }
+
+        zoomSlider.addEventListener('input', function() {
+            scale = parseFloat(zoomSlider.value);
+            drawImage();
         });
 
-        document.getElementById('zoomIn').addEventListener('click', function() {
-            const slider = document.getElementById('zoomSlider');
-            slider.value = Math.min(parseFloat(slider.value) + 0.1, 3);
-            scale = slider.value;
-            img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-            img.setAttribute('data-scale', scale);
+        zoomInButton.addEventListener('click', function() {
+            scale = Math.min(scale + 0.1, 3);
+            zoomSlider.value = scale;
+            drawImage();
         });
 
-        document.getElementById('zoomOut').addEventListener('click', function() {
-            const slider = document.getElementById('zoomSlider');
-            slider.value = Math.max(parseFloat(slider.value) - 0.1, 0.5);
-            scale = slider.value;
-            img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-            img.setAttribute('data-scale', scale);
+        zoomOutButton.addEventListener('click', function() {
+            scale = Math.max(scale - 0.1, 0.5);
+            zoomSlider.value = scale;
+            drawImage();
         });
 
-        document.getElementById('doneButton').addEventListener('click', function() {
+        imageCanvas.addEventListener('mousedown', function(event) {
+            isDragging = true;
+        });
+
+        imageCanvas.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        imageCanvas.addEventListener('mousemove', function(event) {
+            if (isDragging) {
+                x += event.movementX;
+                y += event.movementY;
+                drawImage();
+            }
+        });
+
+        doneButton.addEventListener('click', function() {
             saveImage();
         });
     } else {
@@ -60,40 +73,29 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function saveImage() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = document.getElementById('uploadedImage');
-    const frame = document.getElementById('frame');
+    const imageCanvas = document.getElementById('imageCanvas');
+    const ctx = imageCanvas.getContext('2d');
+    const img = document.querySelector('#imageCanvas img');
+    const frame = new Image();
+    frame.src = 'https://frame.twibbonize.com/679bb025-afc8-4ccd-b69f-3e11f8e43099.png'; // URL da moldura
+    const scale = parseFloat(document.getElementById('zoomSlider').value) || 1;
+    const offsetX = parseFloat(document.getElementById('imageCanvas').getAttribute('data-x')) || 0;
+    const offsetY = parseFloat(document.getElementById('imageCanvas').getAttribute('data-y')) || 0;
 
-    const scale = parseFloat(img.getAttribute('data-scale')) || 1;
-    const offsetX = parseFloat(img.getAttribute('data-x')) || 0;
-    const offsetY = parseFloat(img.getAttribute('data-y')) || 0;
+    const finalCanvas = document.createElement('canvas');
+    const finalCtx = finalCanvas.getContext('2d');
+    finalCanvas.width = imageCanvas.width;
+    finalCanvas.height = imageCanvas.height;
 
-    // Calcular dimensões da imagem no canvas
-    const imgWidth = img.naturalWidth * scale;
-    const imgHeight = img.naturalHeight * scale;
+    finalCtx.translate(-offsetX + (finalCanvas.width / 2), -offsetY + (finalCanvas.height / 2));
+    finalCtx.scale(scale, scale);
+    finalCtx.drawImage(img, 0, 0);
 
-    // Ajustar tamanho do canvas para a imagem transformada
-    canvas.width = frame.width;
-    canvas.height = frame.height;
+    frame.onload = function() {
+        finalCtx.drawImage(frame, 0, 0, finalCanvas.width, finalCanvas.height);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Ajustar a posição e escala da imagem no canvas
-    ctx.translate(-offsetX + (canvas.width - imgWidth) / 2, -offsetY + (canvas.height - imgHeight) / 2);
-    ctx.scale(scale, scale);
-
-    // Desenhar a imagem ajustada no canvas
-    ctx.drawImage(img, 0, 0);
-
-    // Desenhar a moldura no canvas
-    ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
-
-    // Teste para garantir que a imagem final foi criada
-    console.log('Imagem final criada');
-
-    const finalImageSrc = canvas.toDataURL('image/png');
-    localStorage.setItem('finalImage', finalImageSrc);
-
-    window.location.href = 'final.html';
+        const finalImageSrc = finalCanvas.toDataURL('image/png');
+        localStorage.setItem('finalImage', finalImageSrc);
+        window.location.href = 'final.html';
+    };
 }
