@@ -4,16 +4,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const img = document.getElementById('uploadedImage');
         img.src = uploadedImage;
 
+        let scale = 1;
+        let x = 0;
+        let y = 0;
+
         interact('#uploadedImage')
             .draggable({
                 listeners: {
                     move(event) {
-                        const x = (parseFloat(img.getAttribute('data-x')) || 0) + event.dx;
-                        const y = (parseFloat(img.getAttribute('data-y')) || 0) + event.dy;
-
-                        img.style.transform = `translate(${x}px, ${y}px) scale(${parseFloat(img.getAttribute('data-scale')) || 1})`;
-                        img.setAttribute('data-x', x);
-                        img.setAttribute('data-y', y);
+                        x += event.dx;
+                        y += event.dy;
+                        img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
                     }
                 },
                 modifiers: [
@@ -23,16 +24,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 ],
                 inertia: true
-            })
-            .gesturable({
-                listeners: {
-                    move(event) {
-                        const scale = (parseFloat(img.getAttribute('data-scale')) || 1) * event.scale;
-                        img.style.transform = `translate(${parseFloat(img.getAttribute('data-x')) || 0}px, ${parseFloat(img.getAttribute('data-y')) || 0}px) scale(${scale})`;
-                        img.setAttribute('data-scale', scale);
-                    }
-                }
             });
+
+        document.getElementById('zoomSlider').addEventListener('input', function(event) {
+            scale = event.target.value;
+            img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        });
+
+        document.getElementById('zoomIn').addEventListener('click', function() {
+            const slider = document.getElementById('zoomSlider');
+            slider.value = parseFloat(slider.value) + 0.1;
+            scale = slider.value;
+            img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', function() {
+            const slider = document.getElementById('zoomSlider');
+            slider.value = parseFloat(slider.value) - 0.1;
+            scale = slider.value;
+            img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        });
 
         document.getElementById('doneButton').addEventListener('click', function() {
             saveImage();
@@ -48,23 +59,19 @@ function saveImage() {
     const img = document.getElementById('uploadedImage');
     const frame = document.getElementById('frame');
 
-    // Define as dimensões do canvas como as do container
     canvas.width = frame.offsetWidth;
     canvas.height = frame.offsetHeight;
 
-    // Ajusta o contexto do canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Desenha a imagem ajustada e a moldura no canvas
-    ctx.drawImage(img, 
-        parseFloat(img.getAttribute('data-x')) || 0, 
-        parseFloat(img.getAttribute('data-y')) || 0, 
-        img.naturalWidth * (parseFloat(img.getAttribute('data-scale')) || 1), 
+
+    ctx.drawImage(img,
+        -parseFloat(img.getAttribute('data-x')) || 0,
+        -parseFloat(img.getAttribute('data-y')) || 0,
+        img.naturalWidth * (parseFloat(img.getAttribute('data-scale')) || 1),
         img.naturalHeight * (parseFloat(img.getAttribute('data-scale')) || 1)
     );
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
 
-    // Converte o canvas para uma URL de imagem
     const finalImageSrc = canvas.toDataURL('image/png');
     localStorage.setItem('finalImage', finalImageSrc);
 
