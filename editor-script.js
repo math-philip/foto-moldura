@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const x = (parseFloat(img.getAttribute('data-x')) || 0) + event.dx;
                         const y = (parseFloat(img.getAttribute('data-y')) || 0) + event.dy;
 
-                        img.style.transform = `translate(${x}px, ${y}px)`;
+                        img.style.transform = `translate(${x}px, ${y}px) scale(${parseFloat(img.getAttribute('data-scale')) || 1})`;
                         img.setAttribute('data-x', x);
                         img.setAttribute('data-y', y);
                     }
@@ -26,9 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .gesturable({
                 listeners: {
-                    start(event) {
-                        // Start scaling
-                    },
                     move(event) {
                         const scale = (parseFloat(img.getAttribute('data-scale')) || 1) * event.scale;
                         img.style.transform = `translate(${parseFloat(img.getAttribute('data-x')) || 0}px, ${parseFloat(img.getAttribute('data-y')) || 0}px) scale(${scale})`;
@@ -36,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
-        
+
         document.getElementById('doneButton').addEventListener('click', function() {
             saveImage();
         });
@@ -51,12 +48,23 @@ function saveImage() {
     const img = document.getElementById('uploadedImage');
     const frame = document.getElementById('frame');
 
-    canvas.width = img.offsetWidth;
-    canvas.height = img.offsetHeight;
+    // Define as dimensões do canvas como as do container
+    canvas.width = frame.offsetWidth;
+    canvas.height = frame.offsetHeight;
 
-    ctx.drawImage(img, 0, 0, img.width * (parseFloat(img.getAttribute('data-scale')) || 1), img.height * (parseFloat(img.getAttribute('data-scale')) || 1));
+    // Ajusta o contexto do canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Desenha a imagem ajustada e a moldura no canvas
+    ctx.drawImage(img, 
+        parseFloat(img.getAttribute('data-x')) || 0, 
+        parseFloat(img.getAttribute('data-y')) || 0, 
+        img.naturalWidth * (parseFloat(img.getAttribute('data-scale')) || 1), 
+        img.naturalHeight * (parseFloat(img.getAttribute('data-scale')) || 1)
+    );
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
 
+    // Converte o canvas para uma URL de imagem
     const finalImageSrc = canvas.toDataURL('image/png');
     localStorage.setItem('finalImage', finalImageSrc);
 
