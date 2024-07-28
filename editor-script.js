@@ -74,18 +74,17 @@ function saveImage() {
     const imgHeight = img.naturalHeight * scale;
 
     // Ajustar tamanho do canvas para a imagem transformada
-    canvas.width = Math.max(imgWidth, frame.width);
-    canvas.height = Math.max(imgHeight, frame.height);
+    canvas.width = frame.width;
+    canvas.height = frame.height;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Ajustar a posição e escala da imagem no canvas
+    ctx.translate(-offsetX + (canvas.width - imgWidth) / 2, -offsetY + (canvas.height - imgHeight) / 2);
+    ctx.scale(scale, scale);
+
     // Desenhar a imagem ajustada no canvas
-    ctx.drawImage(img,
-        -offsetX,
-        -offsetY,
-        img.naturalWidth * scale,
-        img.naturalHeight * scale
-    );
+    ctx.drawImage(img, 0, 0);
 
     // Desenhar a moldura no canvas
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
