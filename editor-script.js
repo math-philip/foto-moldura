@@ -61,28 +61,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function saveImage() {
     const container = document.getElementById('container');
-    const img = document.getElementById('uploadedImage');
-    const frame = document.getElementById('frame');
-
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+    const img = document.getElementById('uploadedImage');
+    const frame = document.getElementById('frame');
 
     const scale = parseFloat(img.getAttribute('data-scale')) || 1;
     const offsetX = parseFloat(img.getAttribute('data-x')) || 0;
     const offsetY = parseFloat(img.getAttribute('data-y')) || 0;
 
-    // Defina o tamanho do canvas para corresponder ao tamanho do container
-    const containerRect = container.getBoundingClientRect();
-    canvas.width = containerRect.width;
-    canvas.height = containerRect.height;
+    // Ajustar tamanho do canvas para a imagem final (1080x1080)
+    canvas.width = 1080;
+    canvas.height = 1080;
 
-    // Desenhe a imagem ajustada no canvas
-    ctx.drawImage(img,
-        -offsetX + (containerRect.width / 2 - (img.naturalWidth * scale) / 2),
-        -offsetY + (containerRect.height / 2 - (img.naturalHeight * scale) / 2),
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Desenhar a imagem ajustada no canvas
+    ctx.drawImage(
+        img,
+        offsetX,
+        offsetY,
         img.naturalWidth * scale,
         img.naturalHeight * scale
     );
 
-    // Desenhe a moldura no canvas
-    ct
+    // Desenhar a moldura no canvas
+    ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+
+    // Teste para garantir que a imagem final foi criada
+    console.log('Imagem final criada');
+
+    const finalImageSrc = canvas.toDataURL('image/png');
+    localStorage.setItem('finalImage', finalImageSrc);
+
+    window.location.href = 'final.html';
+}
