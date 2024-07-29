@@ -8,19 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
             aspectRatio: 1,
             viewMode: 1,
             autoCropArea: 1,
-            movable: true,
-            zoomable: true,
+            movable: false,  // Desativa o movimento da caixa de corte
+            zoomable: false, // Desativa o zoom da caixa de corte
             rotatable: false,
             scalable: false,
-            cropBoxResizable: false,
+            cropBoxResizable: false, // Desativa o redimensionamento da caixa de corte
             ready() {
-                const frame = document.getElementById('frame');
-                frame.style.width = this.cropper.getCropBoxData().width + 'px';
-                frame.style.height = this.cropper.getCropBoxData().height + 'px';
-                frame.style.left = this.cropper.getCropBoxData().left + 'px';
-                frame.style.top = this.cropper.getCropBoxData().top + 'px';
-            },
-            crop() {
                 const frame = document.getElementById('frame');
                 frame.style.width = this.cropper.getCropBoxData().width + 'px';
                 frame.style.height = this.cropper.getCropBoxData().height + 'px';
@@ -28,6 +21,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 frame.style.top = this.cropper.getCropBoxData().top + 'px';
             }
         });
+
+        // Adiciona a funcionalidade de arrastar a imagem de fundo
+        interact('#uploadedImage')
+            .draggable({
+                listeners: {
+                    move(event) {
+                        const { target } = event;
+                        const dataX = parseFloat(target.getAttribute('data-x')) || 0;
+                        const dataY = parseFloat(target.getAttribute('data-y')) || 0;
+
+                        target.style.transform = `translate(${dataX + event.dx}px, ${dataY + event.dy}px)`;
+                        target.setAttribute('data-x', dataX + event.dx);
+                        target.setAttribute('data-y', dataY + event.dy);
+                    }
+                },
+                modifiers: [
+                    interact.modifiers.restrictRect({
+                        restriction: 'parent',
+                        endOnly: true
+                    })
+                ],
+                inertia: true
+            });
 
         document.getElementById('doneButton').addEventListener('click', function() {
             saveImage(cropper);
